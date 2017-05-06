@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import TimeAgo from 'react-timeago'
 import {
   Table,
   TableBody,
@@ -60,7 +61,7 @@ const CreatedDateCell = (props) => {
         wordWrap: 'break-word'
       }}
     >
-      { item.createDate.toString() }
+      <TimeAgo date={item.createDate} />
     </TableRowColumn>
   );
 };
@@ -74,17 +75,15 @@ const FinishedDateCell = (props) => {
         wordWrap: 'break-word'
       }}
     >
-      {
-        item.finishedDate
-          ? item.finishedDate.toString()
-          : (
-            <FlatButton
-              label="Finish"
-              secondary={true}
-              onTouchTap={(event) => handleFinishItem(item)}
-            />
-          )
-      }
+      {item.finishedDate ? (
+        <TimeAgo date={item.finishedDate} />
+      ) : (
+        <FlatButton
+          label="Finish"
+          secondary={true}
+          onTouchTap={(event) => handleFinishItem(item)}
+        />
+      )}
     </TableRowColumn>
   );
 };
