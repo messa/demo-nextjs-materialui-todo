@@ -1,3 +1,4 @@
+import React, {Component} from 'react';
 import Head from 'next/head'
 
 export default () => (
@@ -21,6 +22,11 @@ export default () => (
       body {
         font-size: 15px;
         line-height: 24px;
+      }
+      h2 {
+        font-weight: 300;
+        margin-top: 1.5rem;
+        margin-bottom: 0.66rem;
       }
     `}</style>
   </Head>
