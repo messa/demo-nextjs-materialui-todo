@@ -19,6 +19,15 @@ import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import DeleteIcon from 'material-ui/svg-icons/action/delete';
 import RestoreIcon from 'material-ui/svg-icons/action/restore';
 
+const iconColumnStyle = {
+  width: "4em",
+  // backgroundColor: '#eee',
+  paddingLeft: 0,
+  paddingRight: 0,
+  textAlign: 'center',
+  textOverflow: 'fade',
+};
+
 const upperCaseFirst = (s) => (s ? (s[0].toUpperCase() + s.substr(1)) : s);
 
 const sorted = (items, keyFactory) => {
@@ -31,6 +40,78 @@ const sorted = (items, keyFactory) => {
   return temp.map(({value}) => value);
 };
 
+const LabelCell = (props) => {
+  const { item, colSpan } = props;
+  return (
+    <TableRowColumn colSpan={colSpan || "1"}>
+      <strong style={{ fontWeight: '500' }}>
+        { item.label }
+      </strong>
+    </TableRowColumn>
+  );
+};
+
+const CreatedDateCell = (props) => {
+  const { item } = props;
+  return (
+    <TableRowColumn
+      style={{
+        whiteSpace: 'normal',
+        wordWrap: 'break-word'
+      }}
+    >
+      { item.createDate.toString() }
+    </TableRowColumn>
+  );
+};
+
+const FinishedDateCell = (props) => {
+  const { item, handleFinishItem } = props;
+  return (
+    <TableRowColumn
+      style={{
+        whiteSpace: 'normal',
+        wordWrap: 'break-word'
+      }}
+    >
+      {
+        item.finishedDate
+          ? item.finishedDate.toString()
+          : (
+            <FlatButton
+              label="Finish"
+              secondary={true}
+              onTouchTap={(event) => handleFinishItem(item)}
+            />
+          )
+      }
+    </TableRowColumn>
+  );
+};
+
+const ActionCell = (props) => {
+  const { item, handleUnfinishItem, handleDeleteItem } = props;
+  return (
+    <TableRowColumn style={iconColumnStyle}>
+      <IconMenu
+        iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
+      >
+        <MenuItem
+          primaryText="Undo finish"
+          leftIcon={<RestoreIcon />}
+          disabled={!item.finishedDate}
+          onTouchTap={(event) => handleUnfinishItem(item)}
+        />
+        <MenuItem
+          primaryText="Delete"
+          leftIcon={<DeleteIcon />}
+          onTouchTap={(event) => handleDeleteItem(item)}
+        />
+      </IconMenu>
+    </TableRowColumn>
+  );
+};
+
 export default class TodoList extends React.Component {
 
   state = {
@@ -41,6 +122,7 @@ export default class TodoList extends React.Component {
         createDate: new Date(1494101084857),
       }
     ],
+    largeWidth: true,
   };
 
   handleSubmit = (event) => {
@@ -113,15 +195,25 @@ export default class TodoList extends React.Component {
     });
   };
 
+  handleWindowResize = () => {
+    this.setState({
+      largeWidth: window.innerWidth > 500,
+    });
+  };
+
+  componentDidMount() {
+    this.setState({
+      largeWidth: window.innerWidth > 500,
+    });
+    window.addEventListener("resize", this.handleWindowResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.handleWindowResize);
+  }
+
   render() {
-    const iconColumnStyle = {
-      width: "4em",
-      // backgroundColor: '#eee',
-      paddingLeft: 0,
-      paddingRight: 0,
-      textAlign: 'center',
-      textOverflow: 'fade',
-    };
+    const large = this.state.largeWidth;
     let showItems = this.state.allItems.filter((item) => !item.deletedDate);
     /*
     showItems = sorted(showItems, (item) => -1 * item.createDate);
@@ -134,12 +226,20 @@ export default class TodoList extends React.Component {
             displaySelectAll={false}
             adjustForCheckbox={false}
           >
-            <TableRow>
-              <TableHeaderColumn>Todo</TableHeaderColumn>
-              <TableHeaderColumn>Created</TableHeaderColumn>
-              <TableHeaderColumn>Finished</TableHeaderColumn>
-              <TableHeaderColumn style={iconColumnStyle}></TableHeaderColumn>
-            </TableRow>
+            {large ? (
+              <TableRow>
+                <TableHeaderColumn>Todo</TableHeaderColumn>
+                <TableHeaderColumn>Created</TableHeaderColumn>
+                <TableHeaderColumn>Finished</TableHeaderColumn>
+                <TableHeaderColumn style={iconColumnStyle}></TableHeaderColumn>
+              </TableRow>
+            ) : (
+              <TableRow>
+                <TableHeaderColumn>Created</TableHeaderColumn>
+                <TableHeaderColumn>Finished</TableHeaderColumn>
+                <TableHeaderColumn style={iconColumnStyle}></TableHeaderColumn>
+              </TableRow>
+            )}
           </TableHeader>
           <TableBody
             displayRowCheckbox={false}
@@ -147,63 +247,31 @@ export default class TodoList extends React.Component {
             stripedRows={false}
           >
             {showItems.map((item, n) => (
-              <TableRow key={n}>
-
-                <TableRowColumn>
-                  <strong style={{ fontWeight: '500' }}>
-                    { item.label }
-                  </strong>
-                </TableRowColumn>
-
-                <TableRowColumn
-                  style={{
-                    whiteSpace: 'normal',
-                    wordWrap: 'break-word'
-                  }}
-                >
-                  { item.createDate.toString() }
-                </TableRowColumn>
-
-                <TableRowColumn
-                  style={{
-                    whiteSpace: 'normal',
-                    wordWrap: 'break-word'
-                  }}
-                >
-                  {
-                    item.finishedDate
-                      ? item.finishedDate.toString()
-                      : (
-                        <FlatButton
-                          label="Finish"
-                          secondary={true}
-                          onTouchTap={(event) => {
-                            this.markItemFinished(item);
-                          }}
-                        />
-                      )
-                  }
-                </TableRowColumn>
-
-                <TableRowColumn style={iconColumnStyle}>
-                  <IconMenu
-                    iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-                  >
-                    <MenuItem
-                      primaryText="Undo finish"
-                      leftIcon={<RestoreIcon />}
-                      disabled={!item.finishedDate}
-                      onTouchTap={(event) => this.markItemUnfinished(item)}
-                    />
-                    <MenuItem
-                      primaryText="Delete"
-                      leftIcon={<DeleteIcon />}
-                      onTouchTap={(event) => this.markItemDeleted(item)}
-                    />
-                  </IconMenu>
-                </TableRowColumn>
-
-              </TableRow>
+              large ? (
+                <TableRow key={n}>
+                  <LabelCell item={item} />
+                  <CreatedDateCell item={item} />
+                  <FinishedDateCell item={item} handleFinishItem={this.markItemFinished} />
+                  <ActionCell
+                    item={item}
+                    handleUnfinishItem={this.markItemUnfinished}
+                    handleDeleteItem={this.markItemDeleted}
+                  />
+                </TableRow>
+              ) : [
+                <TableRow key={"A"+n} style={{borderBottom: "none"}}>
+                  <LabelCell colSpan="3" item={item} />
+                </TableRow>,
+                <TableRow key={"B"+n}>
+                  <CreatedDateCell item={item} />
+                  <FinishedDateCell item={item} handleFinishItem={this.markItemFinished} />
+                  <ActionCell
+                    item={item}
+                    handleUnfinishItem={this.markItemUnfinished}
+                    handleDeleteItem={this.markItemDeleted}
+                  />
+                </TableRow>
+              ]
             ))}
           </TableBody>
         </Table>
