@@ -13,10 +13,11 @@ import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
+import NavigationBack from 'material-ui/svg-icons/navigation/arrow-back';
+
 
 import '../components/tap_events';
 import CustomHead from '../components/custom_head';
-import TodoList from '../components/todo_list';
 
 const themePalette = {
   primary1Color: blue500,
@@ -34,10 +35,10 @@ const containerStyles = {
   paddingRight: '1em',
 };
 
-class IndexPage extends React.Component {
+class AboutPage extends React.Component {
 
   static async getInitialProps ({ req }) {
-    console.info('In IndexPage getInitialProps');
+    console.info('In AboutPage getInitialProps');
     return {
       userAgent: req ? req.headers['user-agent'] : navigator.userAgent,
     }
@@ -55,8 +56,16 @@ class IndexPage extends React.Component {
         >
           <div>
             <AppBar
-              title="Todo App Demo"
-              showMenuIconButton={false}
+              title="About Todo App Demo"
+              iconElementLeft={
+                <IconButton
+                  onTouchTap={(event) => {
+                    Router.push('/');
+                  }}
+                >
+                  <NavigationBack />
+                </IconButton>
+              }
               iconElementRight={
                 <IconMenu
                   iconButtonElement={
@@ -66,10 +75,9 @@ class IndexPage extends React.Component {
                   anchorOrigin={{horizontal: 'right', vertical: 'top'}}
                  >
                    <MenuItem
-                     primaryText="About"
+                     primaryText="Dashboard"
                      onTouchTap={(event) => {
-                       console.info('About MenuItem onTouchTap');
-                       Router.push('/about');
+                       Router.push('/');
                      }}
                    />
                  </IconMenu>
@@ -78,7 +86,7 @@ class IndexPage extends React.Component {
 
             <div style={containerStyles}>
 
-              <TodoList/>
+              <p>Hello!</p>
 
             </div>
 
@@ -89,4 +97,4 @@ class IndexPage extends React.Component {
   }
 }
 
-export default IndexPage;
+export default AboutPage;
