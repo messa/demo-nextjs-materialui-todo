@@ -1,0 +1,8 @@
+{
+  "name": "demo-nextjs-material-todo",
+  "version": "0.0.1",
+  "description": "Example project",
+  "main": "index.js",
+  "author": "Petr Messner <petr.messner@gmail.com>",
+  "license": "MIT"
+}
