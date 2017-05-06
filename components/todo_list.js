@@ -9,16 +9,16 @@ import {
   TableRow,
   TableRowColumn,
 } from 'material-ui/Table';
-import TextField from 'material-ui/TextField';
-import Toggle from 'material-ui/Toggle';
 import FlatButton from 'material-ui/FlatButton';
-import Paper from 'material-ui/Paper';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
 import IconButton from 'material-ui/IconButton';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import DeleteIcon from 'material-ui/svg-icons/action/delete';
 import RestoreIcon from 'material-ui/svg-icons/action/restore';
+
+import DebugData from './debug_data';
+import AddNewItem from './add_new_item';
 
 const iconColumnStyle = {
   width: "4em",
@@ -29,8 +29,7 @@ const iconColumnStyle = {
   textOverflow: 'fade',
 };
 
-const upperCaseFirst = (s) => (s ? (s[0].toUpperCase() + s.substr(1)) : s);
-
+/*
 const sorted = (items, keyFactory) => {
   const temp = items.map((item) => ({key: keyFactory(item), value: item}));
   temp.sort((a, b) => {
@@ -40,6 +39,7 @@ const sorted = (items, keyFactory) => {
   });
   return temp.map(({value}) => value);
 };
+*/
 
 const LabelCell = (props) => {
   const { item, colSpan } = props;
@@ -114,7 +114,6 @@ const ActionCell = (props) => {
 export default class TodoList extends React.Component {
 
   state = {
-    newItemLabel: '',
     allItems: [
       {
         label: "first",
@@ -124,16 +123,13 @@ export default class TodoList extends React.Component {
     largeWidth: true,
   };
 
-  handleSubmit = (event) => {
-    event.preventDefault();
-    const label = this.state.newItemLabel;
+  handleNewItem = ({label}) => {
     if (label) {
       const newItem = {
         label,
         createDate: new Date(),
       };
       this.setState((state) => ({
-        newItemLabel: '',
         allItems: [newItem, ...state.allItems],
       }));
     }
@@ -174,7 +170,6 @@ export default class TodoList extends React.Component {
       };
     });
   };
-
 
   markItemDeleted = (deletedItem) => {
     this.setState((state) => {
@@ -274,45 +269,8 @@ export default class TodoList extends React.Component {
             ))}
           </TableBody>
         </Table>
-        <div style={{marginTop: '1rem'}}>
-          <h2>Add new item</h2>
-          <form onSubmit={this.handleSubmit}>
-            <TextField
-              id="label"
-              hintText="New todo item"
-              value={this.state.newItemLabel}
-              onChange={(event) => {
-                this.setState({
-                  newItemLabel: upperCaseFirst(event.target.value),
-                });
-              }}
-            />
-          </form>
-          <br />
-        </div>
-
-        <div style={{
-          padding: '.1rem .75em',
-          borderLeft: '1px solid #930',
-        }}>
-          <div style={{
-            color: '#930',
-            fontSize: '125%',
-            fontWeight: '300',
-          }}>
-            State
-          </div>
-          <pre style={{
-            fontSize: '85%',
-            lineHeight: '1.2',
-            fontFamily: 'inconsolata, terminus, monospace',
-            marginBottom: '0',
-            overflowX: 'auto',
-          }}>
-            {JSON.stringify(this.state, null, 2)}
-          </pre>
-        </div>
-
+        <AddNewItem handleNewItem={this.handleNewItem} />
+        <DebugData title="TodoList state" data={this.state} />
       </div>
     );
   }
