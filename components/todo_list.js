@@ -61,7 +61,7 @@ const CreatedDateCell = (props) => {
         wordWrap: 'break-word'
       }}
     >
-      <TimeAgo date={item.createDate} />
+      <TimeAgo date={new Date(item.createDate)} />
     </TableRowColumn>
   );
 };
@@ -76,7 +76,7 @@ const FinishedDateCell = (props) => {
       }}
     >
       {item.finishedDate ? (
-        <TimeAgo date={item.finishedDate} />
+        <TimeAgo date={new Date(item.finishedDate)} />
       ) : (
         <FlatButton
           label="Finish"
@@ -113,15 +113,14 @@ const ActionCell = (props) => {
 
 export default class TodoList extends React.Component {
 
-  state = {
-    allItems: [
-      {
-        label: "first",
-        createDate: new Date(1494101084857),
-      }
-    ],
-    largeWidth: true,
-  };
+  constructor(props) {
+    super(props);
+    console.info(`TodoList initial props.todoItems: ${JSON.stringify(props.todoItems)}`);
+    this.state = {
+      allItems: [...props.todoItems],
+      largeWidth: true,
+    };
+  }
 
   handleNewItem = ({label}) => {
     if (label) {

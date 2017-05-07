@@ -15,7 +15,6 @@ import MenuItem from 'material-ui/MenuItem';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import NavigationBack from 'material-ui/svg-icons/navigation/arrow-back';
 
-
 import '../components/tap_events';
 import CustomHead from '../components/custom_head';
 

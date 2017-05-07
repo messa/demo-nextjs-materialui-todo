@@ -34,12 +34,21 @@ const containerStyles = {
   paddingRight: '1em',
 };
 
+const retrieveTodoItems = async () => {
+  const res = await fetch('/api/todo-items');
+  const data = await res.json();
+  const { todoItems } = data;
+  console.info(`Retrieved ${todoItems.length} todoItems: ${JSON.stringify(todoItems)}`);
+  return todoItems;
+}
+
 class IndexPage extends React.Component {
 
   static async getInitialProps ({ req }) {
     console.info('In IndexPage getInitialProps');
     return {
       userAgent: req ? req.headers['user-agent'] : navigator.userAgent,
+      todoItems: req ? req.model.getTodoItems() : await retrieveTodoItems(),
     }
   }
 
@@ -78,7 +87,7 @@ class IndexPage extends React.Component {
 
             <div style={containerStyles}>
 
-              <TodoList/>
+              <TodoList todoItems={this.props.todoItems} />
 
             </div>
 
