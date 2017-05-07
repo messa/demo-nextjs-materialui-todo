@@ -126,7 +126,8 @@ export default class TodoList extends React.Component {
     if (label) {
       const newItem = {
         label,
-        createDate: new Date(),
+        id: '' + new Date() * 1,
+        createDate: new Date().toISOString(),
       };
       this.setState((state) => ({
         allItems: [newItem, ...state.allItems],
@@ -135,57 +136,36 @@ export default class TodoList extends React.Component {
   };
 
   markItemFinished = (finishedItem) => {
-    this.setState((state) => {
-      const newItems = [];
-      for (let item of state.allItems) {
-        if (item === finishedItem) {
-          item = {
-            ...item,
-            finishedDate: new Date(),
-          }
-        }
-        newItems.push(item);
-      }
-      return {
-        allItems: newItems,
-      };
-    });
+    const finishedItemId = finishedItem.id;
+    this.setState((state) => ({
+      allItems: state.allItems.map((item) => (
+        item.id == finishedItemId
+          ? { ...item, finishedDate: new Date().toISOString() }
+          : item
+      )),
+    }));
   };
 
   markItemUnfinished = (unfinishedItem) => {
-    this.setState((state) => {
-      const newItems = [];
-      for (let item of state.allItems) {
-        if (item === unfinishedItem) {
-          item = {
-            ...item,
-            finishedDate: null,
-          }
-        }
-        newItems.push(item);
-      }
-      return {
-        allItems: newItems,
-      };
-    });
+    const unfinishedItemId = unfinishedItem.id;
+    this.setState((state) => ({
+      allItems: state.allItems.map((item) => (
+        item.id == unfinishedItemId
+          ? { ...item, finishedDate: null }
+          : item
+      )),
+    }));
   };
 
   markItemDeleted = (deletedItem) => {
-    this.setState((state) => {
-      const newItems = [];
-      for (let item of state.allItems) {
-        if (item === deletedItem) {
-          item = {
-            ...item,
-            deletedDate: new Date(),
-          }
-        }
-        newItems.push(item);
-      }
-      return {
-        allItems: newItems,
-      };
-    });
+    const deletedItemId = deletedItem.id;
+    this.setState((state) => ({
+      allItems: state.allItems.map((item) => (
+        item.id == deletedItemId
+          ? { ...item, deletedDate: new Date().toISOString() }
+          : item
+      )),
+    }));
   };
 
   handleWindowResize = () => {
