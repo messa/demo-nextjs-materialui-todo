@@ -3,7 +3,7 @@ import Head from 'next/head'
 
 export default () => (
   <Head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
     <title>Todo app demo</title>
     <meta
       name="viewport"
