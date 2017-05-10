@@ -35,7 +35,7 @@ const containerStyles = {
 };
 
 const retrieveTodoItems = async () => {
-  const res = await fetch('/api/todo-items');
+  const res = await fetch('/api/todo-items/all');
   const data = await res.json();
   const { todoItems } = data;
   console.info(`Retrieved ${todoItems.length} todoItems: ${JSON.stringify(todoItems)}`);

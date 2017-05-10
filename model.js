@@ -3,8 +3,8 @@ class Model {
   // This object should be communicating with a database, but right now
   // hardcoded values are ok.
 
-  getTodoItems() {
-    return [
+  constructor() {
+    this.todoItems = [
       {
         id: "todo01",
         label: "Cheese",
@@ -17,6 +17,26 @@ class Model {
         finishedDate: null,
       },
     ];
+  }
+
+  getTodoItems() {
+    return this.todoItems.filter((item) => (!item.deletedDate));
+  }
+
+  addTodoItem(newItem) {
+    const item = {
+      id: (1 * new Date()).toString(),
+      label: newItem.label,
+      createDate: new Date().toISOString(),
+      finishedDate: null,
+    }
+    this.todoItems = [item, ...this.todoItems];
+    return item;
+  }
+
+  updateTodoItem(itemId, changes) {
+    this.todoItems = this.todoItems.map(
+      (item) => (item.id == itemId ? { ...item, ...changes} : item));
   }
 
 }

@@ -9,15 +9,29 @@ export default class AddNewItem extends React.Component {
 
   state = {
     newItemLabel: '',
+    disabled: false,
   };
 
   handleSubmit = (event) => {
     event.preventDefault();
     const label = this.state.newItemLabel;
-    this.props.handleNewItem({label});
     this.setState({
-      newItemLabel: '',
+      disabled: true,
     });
+    const afterCallback = (success) => {
+      if (success) {
+        this.setState({
+          newItemLabel: '',
+        });
+      }
+      this.setState({
+        disabled: false,
+      });
+      if (this.labelInput) {
+        this.labelInput.focus();
+      }
+    }
+    this.props.handleNewItem({label}, afterCallback);
   };
 
   render() {
@@ -29,6 +43,8 @@ export default class AddNewItem extends React.Component {
             id="label"
             hintText="New todo item"
             value={this.state.newItemLabel}
+            disabled={this.state.disabled}
+            ref={(input) => { this.labelInput = input; }}
             onChange={(event) => {
               this.setState({
                 newItemLabel: upperCaseFirst(event.target.value),

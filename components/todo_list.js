@@ -16,6 +16,7 @@ import IconButton from 'material-ui/IconButton';
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import DeleteIcon from 'material-ui/svg-icons/action/delete';
 import RestoreIcon from 'material-ui/svg-icons/action/restore';
+import CircularProgress from 'material-ui/CircularProgress';
 
 import DebugData from './debug_data';
 import AddNewItem from './add_new_item';
@@ -68,6 +69,32 @@ const CreatedDateCell = (props) => {
 
 const FinishedDateCell = (props) => {
   const { item, handleFinishItem } = props;
+  let content = null;
+  if (item.finishedWIP) {
+    content = (
+      <CircularProgress size={18} />
+    );
+  } else if (item.finishedDate) {
+    content = (
+      <TimeAgo date={new Date(item.finishedDate)} />
+    );
+  } else {
+    content = (
+      <FlatButton
+        label="Finish"
+        secondary={true}
+        onTouchTap={(event) => handleFinishItem(item)}
+      />
+    );
+  }
+  let err = null;
+  if (item.finishedWIPError) {
+    err = (
+      <div style={{ color: 'red' }}>
+        Failed: {item.finishedWIPError}
+      </div>
+    );
+  }
   return (
     <TableRowColumn
       style={{
@@ -75,15 +102,8 @@ const FinishedDateCell = (props) => {
         wordWrap: 'break-word'
       }}
     >
-      {item.finishedDate ? (
-        <TimeAgo date={new Date(item.finishedDate)} />
-      ) : (
-        <FlatButton
-          label="Finish"
-          secondary={true}
-          onTouchTap={(event) => handleFinishItem(item)}
-        />
-      )}
+      {content}
+      {err}
     </TableRowColumn>
   );
 };
@@ -122,50 +142,151 @@ export default class TodoList extends React.Component {
     };
   }
 
-  handleNewItem = ({label}) => {
-    if (label) {
-      const newItem = {
-        label,
-        id: '' + new Date() * 1,
-        createDate: new Date().toISOString(),
-      };
-      this.setState((state) => ({
-        allItems: [newItem, ...state.allItems],
-      }));
+  handleNewItem = ({label}, afterCallback) => {
+    if (!label) {
+      return;
     }
+    const newItem = {
+      label,
+    };
+    this.setState({
+      addWIP: true,
+      addWIPError: null,
+    });
+    fetch('/api/todo-items/add', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        newTodoItem: newItem,
+      }),
+    })
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      const { newTodoItem } = data;
+      this.setState((state) => ({
+        allItems: [newTodoItem, ...state.allItems],
+        addWIP: false,
+        addWIPError: null,
+      }));
+      afterCallback(true);
+    })
+    .catch((err) => {
+      const msg = err.toString();
+      this.setState({
+        addWIP: false,
+        addWIPError: msg,
+      });
+      afterCallback(false);
+    })
+
+  };
+
+  setItemState = (itemId, changes) => {
+    this.setState((state) => ({
+      allItems: state.allItems.map((item) => (
+        item.id == itemId
+          ? { ...item, ...changes }
+          : item
+      )),
+    }));
   };
 
   markItemFinished = (finishedItem) => {
     const finishedItemId = finishedItem.id;
-    this.setState((state) => ({
-      allItems: state.allItems.map((item) => (
-        item.id == finishedItemId
-          ? { ...item, finishedDate: new Date().toISOString() }
-          : item
-      )),
-    }));
+    this.setItemState(finishedItemId, {
+      finishedWIP: true,
+      finishedWIPError: null,
+    });
+    fetch('/api/todo-items/mark-finished', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        todoItemId: finishedItemId,
+      }),
+    })
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      this.setItemState(finishedItemId, {
+        finishedDate: data.finishedDate,
+        finishedWIP: false,
+        finishedWIPError: null,
+      });
+    })
+    .catch((err) => {
+      const msg = err.toString();
+      this.setItemState(finishedItemId, {
+        finishedWIP: false,
+        finishedWIPError: msg,
+      });
+    })
   };
 
   markItemUnfinished = (unfinishedItem) => {
     const unfinishedItemId = unfinishedItem.id;
-    this.setState((state) => ({
-      allItems: state.allItems.map((item) => (
-        item.id == unfinishedItemId
-          ? { ...item, finishedDate: null }
-          : item
-      )),
-    }));
+    this.setItemState(unfinishedItemId, {
+      finishedWIP: true,
+      finishedWIPError: null,
+    });
+    fetch('/api/todo-items/mark-unfinished', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        todoItemId: unfinishedItemId,
+      }),
+    })
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      this.setItemState(unfinishedItemId, {
+        finishedDate: null,
+        finishedWIP: false,
+        finishedWIPError: null,
+      });
+    })
+    .catch((err) => {
+      const msg = err.toString();
+      this.setItemState(unfinishedItemId, {
+        finishedWIP: false,
+        finishedWIPError: msg,
+      });
+    })
   };
 
   markItemDeleted = (deletedItem) => {
     const deletedItemId = deletedItem.id;
-    this.setState((state) => ({
-      allItems: state.allItems.map((item) => (
-        item.id == deletedItemId
-          ? { ...item, deletedDate: new Date().toISOString() }
-          : item
-      )),
-    }));
+    this.setItemState(deletedItemId, {
+      finishedWIP: true,
+      finishedWIPError: null,
+    });
+    fetch('/api/todo-items/mark-deleted', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        todoItemId: deletedItemId,
+      }),
+    })
+    .then((response) => {
+      return response.json();
+    })
+    .then((data) => {
+      this.setItemState(deletedItemId, {
+        deletedDate: data.deletedDate,
+        finishedWIP: false,
+        finishedWIPError: null,
+      });
+    })
+    .catch((err) => {
+      const msg = err.toString();
+      this.setItemState(deletedItemId, {
+        finishedWIP: false,
+        finishedWIPError: msg,
+      });
+    })
   };
 
   handleWindowResize = () => {
@@ -248,7 +369,19 @@ export default class TodoList extends React.Component {
             ))}
           </TableBody>
         </Table>
-        <AddNewItem handleNewItem={this.handleNewItem} />
+
+        <AddNewItem handleNewItem={this.handleNewItem} disabled={this.state.addWIP} />
+
+        {this.state.addWIP ? (
+          <CircularProgress size={18} />
+        ) : null}
+
+        {this.state.addWIPError ? (
+          <div style={{ color: 'red' }}>
+            {this.state.addWIPError}
+          </div>
+        ) : null}
+
         <DebugData title="TodoList state" data={this.state} />
         <DebugData title="TodoList props" data={this.props} />
       </div>
