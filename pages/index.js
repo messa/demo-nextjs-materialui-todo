@@ -48,7 +48,7 @@ class IndexPage extends React.Component {
     console.info('In IndexPage getInitialProps');
     return {
       userAgent: req ? req.headers['user-agent'] : navigator.userAgent,
-      todoItems: req ? req.model.getTodoItems() : await retrieveTodoItems(),
+      initialTodoItems: req ? req.model.getTodoItems() : await retrieveTodoItems(),
     }
   }
 
@@ -87,7 +87,7 @@ class IndexPage extends React.Component {
 
             <div style={containerStyles}>
 
-              <TodoList todoItems={this.props.todoItems} />
+              <TodoList initialTodoItems={this.props.initialTodoItems} />
 
             </div>
 

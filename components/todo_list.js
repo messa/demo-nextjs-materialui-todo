@@ -115,9 +115,9 @@ export default class TodoList extends React.Component {
 
   constructor(props) {
     super(props);
-    console.info(`TodoList initial props.todoItems: ${JSON.stringify(props.todoItems)}`);
+    console.info(`TodoList initial props.initialTodoItems: ${JSON.stringify(props.initialTodoItems)}`);
     this.state = {
-      allItems: [...props.todoItems],
+      allItems: [...props.initialTodoItems],
       largeWidth: true,
     };
   }
@@ -250,6 +250,7 @@ export default class TodoList extends React.Component {
         </Table>
         <AddNewItem handleNewItem={this.handleNewItem} />
         <DebugData title="TodoList state" data={this.state} />
+        <DebugData title="TodoList props" data={this.props} />
       </div>
     );
   }
